@@ -1,0 +1,131 @@
+
+REAL-WORLD PRACTICE LAB (Enterprise Network)
+
+🎯 Scenario: Medium Company Network
+
+A company has:
+       3 departments: HR, IT, Sales
+       1 Server Room
+       1 Internet connection
+       Centralized control with Core Layer 3 Switch
+
+📌 Requirements,
+
+       Each department must be isolated (VLANs)
+       All users must get IP automatically (DHCP)
+       Departments cannot access each other (security)
+       All can access Servers + Internet
+       Servers must be protected
+       Dedicated servers(DNS,WEB,EMAIL)
+
+
+VLAN	   Name	      Network
+
+10	   HR	      192.168.10.0/24
+20	   IT	      192.168.20.0/24
+30	   Sales      192.168.30.0/24
+40	   Servers    192.168.40.0/24
+
+
+
+Configuration done top to bottom (commands),
+
+1.layer 3 switch routing enable,
+
+    ip routing
+    
+    Interface g0/1 
+    Ip address 203.0.113.1 255.255.255.252
+    No shutdown
+
+    
+ 
+2.first configure router and layer 3 connection,(on R1)
+   
+   Interface g0/0
+   Ip address 203.0.113.2 255.255.255.252
+
+
+3.default route define to internet(l3)
+   
+   Ip route 0.0.0.0 0.0.0.0 203.0.113.2
+
+4.create SVI in l3
+  
+   Interface vlan 10
+   Ip address 192.168.10.1 255.255.255.0
+   No shutdown
+
+5.vlan create and named on l3
+  
+   Vlan 10
+   Name HR
+   Vlan 20
+   Name IT
+
+6.swtiches connected interface's configure as trunk ports on l3
+
+  Interface range f0/1-4
+  Switchport trunk encapsulation dot1q
+  Switchport mode trunk
+ 
+   
+7.l2 switchws trunk port define
+  
+  Interface range f0/1
+  Switchport mode trunk
+
+8.create and named vlan on l2 switch
+   
+  Vlan 10
+  Name HR
+
+9.dhcp pool define on l3
+
+  Ip dhcp excluded-address 192.168.10.1
+  Ip dhcp excluded-address 192.168.20.1
+  Ip dhcp excluded-address 192.168.30.1
+  Ip dhcp excluded-address 192.168.40.1
+
+  Ip dhcp pool HR
+  Network 192.168.10.0 255.255.255.0
+  Default router 192.168.10.1
+  Dns-server 192.168.40.10
+
+(same as the other pools to other department.without servers)
+
+10.vlan interface define on l2 switches
+
+  Interface range f0/2-5
+  Switchport mode access
+  Switchport access vlan 10
+
+11.on dhcp on pcs
+12.server static ip assign
+13.ACL on l3
+   
+  Access-list 100 deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+  Access-list 100 deny ip 192.168.30.0 0.0.0.255 192.168.20.0 0.0.0.255
+  Access-list 100 permit ip any any
+
+(Add ACL to interfaces)
+
+  Interface vlan 10
+  Ip Access-group 100 in
+
+  Interface vlan 30
+  Ip access-group 30 in
+  
+14.NAT/PAT config
+
+  Access-list 1 permit 192.168.0.0 0.0.0.255
+
+  Interface g0/0
+  Ip nat inside
+ 
+  Interface g0/1
+  Interface g0/1
+  Ip nat outside
+  
+  Ip nat inside source list 1 interface g0/1 overload
+

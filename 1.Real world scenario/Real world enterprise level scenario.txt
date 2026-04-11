@@ -1,0 +1,102 @@
+
+🌐 Enterprise Network Simulation (Cisco Packet Tracer)
+
+📌 Overview
+
+       This project demonstrates the design and implementation of a real-world enterprise network using Cisco Packet Tracer.
+It simulates how organizations structure networks with VLAN segmentation, Layer 3 routing, security policies, and server integration.
+
+🏢 Network Scenario
+
+  A medium-sized company with:
+         Multiple departments (HR, IT, Sales)
+         Centralized server infrastructure
+         Secure communication between departments
+         Internet access with NAT
+
+
+🧠 Network Design
+
+      VLAN	Department	Network
+      10	HR	        192.168.10.0/24
+      20	IT	        192.168.20.0/24
+      30	Sales	        192.168.30.0/24
+      40	Servers	        192.168.40.0/24
+
+⚙️ Key Features
+
+🔹 Network Architecture
+
+       Multi-VLAN design for department segmentation
+       Separate access switches for each department
+       Core Layer 3 Switch for centralized routing
+
+🔹 Routing & Switching
+
+       Inter-VLAN routing using SVI (Layer 3 switching)
+       VLAN trunking between switches
+
+🔹 IP Management
+
+       DHCP configuration for automatic IP assignment
+       Structured IP addressing scheme
+
+🔹 Security
+ 
+       ACL (Access Control Lists) for inter-department restrictions
+       Controlled communication between VLANs
+
+🔹 Server Infrastructure
+      
+       Dedicated Server VLAN
+       Configured:
+                DNS Server
+                Web Server
+                Email Server (SMTP & POP3)
+
+🔹 Internet Access
+       
+       NAT (Network Address Translation) for external connectivity
+
+📧 Services Configured
+       
+     🌍 Web Server
+          
+            Provides internal web access
+            Hosted in Server VLAN
+     
+     📩 Email Server
+
+            SMTP & POP3 configured
+            Supports communication between departments
+
+     🌐 DNS Server
+
+            Resolves domain names for internal services
+
+🧪 Testing & Verification
+      
+           ✔ DHCP IP assignment across all VLANs
+           ✔ Inter-VLAN communication (controlled via ACL)
+           ✔ Access to DNS, Web, and Email servers
+           ✔ Email sending/receiving between users
+           ✔ Internet connectivity via NAT
+
+🚀 Skills Demonstrated
+
+           LAN Configuration
+           Layer 3 Switching
+           DHCP Deployment
+           ACL Security Implementation
+           NAT Configuration
+           Server Integration (DNS, Web, Email)
+           Network Design & Troubleshooting
+
+💼 Real-World Relevance
+
+  This project reflects how enterprise networks are designed with:
+    
+            Logical segmentation
+            Centralized routing
+            Secure access control
+            Service-based architecture
