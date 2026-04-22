@@ -1,0 +1,65 @@
+Designed a simulated enterprise network representing a Head Office with redundant core routing and a remote branch office. Implemented VLAN-based department segmentation and OSPF dynamic routing between sites.
+
+This topology models a company like a bank, ISP, or large office:
+
+Head Office (core network)
+Internal departments (user networks)
+Remote branch office
+Redundancy (network never goes down)
+
+R1 & R2 → CORE ROUTERS (Backbone)
+
+   Purpose : These are the main highway of the network
+
+   In real companies:
+       Connect to data centers / internet edge
+       Handle high-speed traffic
+       Must NEVER fail
+    
+    Why two routers?
+      Redundancy (if one fails, network still works)
+      Load balancing
+
+R3 & R4 → DISTRIBUTION ROUTERS
+
+   Purpose : These connect core ↔ users
+
+  In real companies:
+         Aggregate multiple access networks
+         Apply policies (security, routing decisions)
+         Control traffic flow
+
+  Why two routers?
+        Each handles different departments
+        Backup path if one fails
+
+R5 → BRANCH ROUTER
+
+    Purpose : Represents a remote office
+
+    In real companies:
+          Connects branch to headquarters
+          Uses WAN links (VPN, MPLS, Internet)
+
+
+WHAT THIS DESIGN ACHIEVES
+
+         1. Redundancy
+
+               Multiple paths → no downtime
+
+         2. Scalability
+
+               Easy to add new departments
+       
+         3. Performance
+ 
+               Traffic can take best path
+   
+         4. Real enterprise structure
+  
+               Core / Distribution / Access model
+
+
+
+Core routers provide high-speed backbone connectivity with redundancy. Distribution routers aggregate access networks and enforce routing policies. Branch routers extend connectivity to remote sites. OSPF ensures dynamic routing and fast convergence

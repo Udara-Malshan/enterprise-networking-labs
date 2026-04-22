@@ -1,0 +1,78 @@
+
+REAL-WORLD PRACTICE LAB (Enterprise Network)-OSPF single area + VLAN
+
+Router	Real World Role
+R1	Core Router
+R2	Core Router
+R3	Distribution Router
+R4	Distribution Router
+R5	Branch Router
+
+01.Interfaces configure
+
+      interface g0/0
+      ip address 10.0.12.1 255.255.255.252
+      no shutdown
+
+02.config loopback ip for routers
+
+      interface loopback0
+      ip address 1.1.1.1 255.255.255.255
+
+03.OSPF config on R1
+ 
+      router ospf 1
+      router-id 1.1.1.1
+      network 10.0.12.0 0.0.0.3 area 0
+      network 10.0.13.0 0.0.0.3 area 0
+      network 1.1.1.1 0.0.0.0 area 0
+
+04.show ospf neighbors and DBs
+   
+      show ip ospf neighbor
+      show ip ospf database
+
+05.VLAN configure
+
+    Switch,
+        vlan 10
+        name FINANCE
+
+        interface range fa0/1-5
+        switchport mode access
+        switchport access vlan 10
+
+        interface fa0/24
+        switchport mode trunk
+
+06.ROUTER ON A STICK (R3)
+
+       interface g0/0
+       no shutdown
+
+
+       interface g0/0.10
+       encapsulation dot1Q 10
+       ip address 192.168.10.1 255.255.255.0
+
+07.Firewall interfaces config
+
+     interface g0/2
+     ip address 10.10.10.2 255.255.255.252
+     nameif INSIDE
+     Security-level 100
+     no shutdown
+
+08.Advertise Internet into OSPF(on R1/R2 core routers)
+
+    router ospf 1
+    default-information originate
+
+
+
+
+
+
+
+
+
