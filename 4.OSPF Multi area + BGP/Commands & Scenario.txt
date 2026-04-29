@@ -1,0 +1,171 @@
+Enterprise-Level Networking Lab
+
+# OSPF Multi-Area + BGP (Real World Design)
+
+
+# 1. Lab Objective
+
+This lab simulates a real enterprise network with:
+
+* Multi-Area OSPF (Internal routing)
+* BGP (ISP connectivity)
+* HQ + Branch offices
+* Server Farm
+* VLAN segmentation
+* Internet edge routing
+
+
+
+# 3. IP Addressing Plan
+
+### OSPF Backbone (Area 0)
+
+*  Core1 ↔ Edge Router
+*  Core2 ↔ Edge Router
+
+### Area 10 (HQ Users)
+
+### Area 20 (Server Farm)
+
+### Area 30 (Branch 1)
+
+### Area 40 (Branch 2)
+
+### ISP Network
+
+* Edge ↔ ISP
+
+
+
+## 4. Devices Required
+
+* 1 ISP Router
+* 1 Edge Router (NAT + BGP)
+* 2 Core Routers (OSPF Area 0)
+* 4 Access/Distribution Routers
+* Switches (for VLANs)
+* PCs (HQ + Branch users)
+* Servers (DHCP, Web, DNS)
+
+
+
+## 5. OSPF Configuration (Multi-Area)
+
+### Core Router 1
+
+
+router ospf 1
+ network 10.0.0.0 0.0.0.3 area 0
+ network 192.168.10.0 0.0.0.255 area 10
+
+
+### Core Router 2
+
+
+router ospf 1
+ network 10.0.0.4 0.0.0.3 area 0
+ network 192.168.20.0 0.0.0.255 area 20
+
+
+### Branch Routers
+
+router ospf 1
+ network 192.168.30.0 0.0.0.255 area 30
+ network 10.0.0.0 0.0.0.3 area 0
+
+
+---
+
+## 6. BGP Configuration (Edge Router + ISP)
+
+### Edge Router (AS 65001)
+
+
+router bgp 65001
+ neighbor 203.0.113.2 remote-as 65000
+ network 192.168.0.0 mask 255.255.0.0
+
+
+### ISP Router (AS 65000)
+
+
+router bgp 65000
+ neighbor 203.0.113.1 remote-as 65001
+
+
+
+## 7. NAT Configuration (Edge Router)
+
+
+access-list 1 permit 192.168.0.0 0.0.255.255
+
+ip nat inside source list 1 interface g0/0 overload
+
+interface g0/0
+ ip nat outside
+
+interface g0/1
+ ip nat inside
+
+
+---
+
+## 8. VLAN Configuration (HQ Example)
+
+
+vlan 10
+ name HR
+vlan 20
+ name IT
+
+interface g0/1.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+
+interface g0/1.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+
+
+---
+
+
+## 9. Verification Commands
+
+### OSPF
+
+
+show ip ospf neighbor
+show ip route
+
+
+### BGP
+
+
+show ip bgp summary
+show ip bgp
+
+
+### NAT
+
+
+show ip nat translations
+
+
+---
+
+## 11. Real-World Concepts that use
+
+* Enterprise segmentation using OSPF Areas
+* Scalability of routing domains
+* ISP connectivity using BGP
+* NAT for public internet access
+* VLAN-based departmental isolation
+* Core vs Edge architecture
+
+---
+
+
+
+## End of Lab
+
