@@ -1,0 +1,154 @@
+
+------------------------------Create the certificate----------------------------------------
+
+1. Install Easy-RSA
+
+The easiest way to install it on a Mac is via Homebrew:
+
+             brew install easy-rsa
+
+2. Initialize the PKI Directory
+Create a directory to hold your CA files, copy the easy-rsa scripts there, and initialize the PKI:
+
+   # Create a folder for your CA
+
+             mkdir ~/vpn-ca
+             cd ~/vpn-ca
+
+   # Copy the easy-rsa scripts to your folder
+      
+             cp -r /opt/homebrew/Cellar/easy-rsa/3.2.6_1/libexec/* ~/vpn-ca/
+
+   # Initialize the PKI (this creates the pki folder)
+
+             ./easyrsa init-pki
+
+3. Build the Certificate Authority (CA)
+This creates the root certificate that will sign your server and client certificates:
+
+   # Build the CA (choose a passphrase when prompted)
+
+             ./easyrsa build-ca nopass
+
+4. Create Server and Client Certificates (With Domains)
+
+   # Generate the Server Certificate
+        
+             ./easyrsa build-server-full server.vpn.local nopass
+
+   # Generate the Client Certificate
+ 
+             ./easyrsa build-client-full client1.vpn.local nopass
+
+
+5. Locate your files
+   Your files are now ready to be imported into AWS:
+
+     CA Certificate:  ~/vpn-ca/pki/ca.crt
+     Server CRT: ~/vpn-ca/pki/issued/server.vpn.local.crt
+     Server Key: ~/vpn-ca/pki/private/server.vpn.local.key
+     Client CRT: ~/vpn-ca/pki/issued/client1.vpn.local.crt
+     Client Key: ~/vpn-ca/pki/private/client1.vpn.local.key
+
+
+
+
+-------------------AWS Cetificate Manager import the certificate using AWS CLI---------------
+
+1.install AWS CLI
+  
+                 brew install awscli
+
+2.Configure your credentials
+
+                 aws configure
+
+     AWS Access Key ID: Enter your Access Key.
+     AWS Secret Access Key: Enter your Secret Key.
+     Default region name: ap-northeast-1
+     Default output format: json
+
+3.Import server & client certificate to ACM
+
+
+     # Import Server
+
+  aws acm import-certificate \
+      --certificate fileb://pki/issued/server.vpn.local.crt \
+      --private-key fileb://pki/private/server.vpn.local.key \
+      --certificate-chain fileb://pki/ca.crt \
+      --region ap-northeast-1
+
+    # Import Client
+
+  aws acm import-certificate \
+      --certificate fileb://pki/issued/client1.vpn.local.crt \
+      --private-key fileb://pki/private/client1.vpn.local.key \
+      --certificate-chain fileb://pki/ca.crt \
+      --region ap-northeast-1
+
+4.Create the VPN Endpoint
+ 
+     Need to add server & client imported certificates' ARN (copy & paste)
+
+   aws ec2 create-client-vpn-endpoint \
+      --client-cidr-block "192.168.0.0/22" \
+      --server-certificate-arn " <SERVER_CETIFICATE_ARN> " \
+      --authentication-options Type=certificate-authentication,MutualAuthentication={ClientRootCertificateChainArn=" <SERVER_CETIFICATE_ARN> "} \
+      --connection-log-options Enabled=false \
+      --region ap-northeast-1
+
+
+5.Associate with your VPC
+
+    aws ec2 associate-client-vpn-target-network \
+    --client-vpn-endpoint-id "cvpn-endpoint-0cde241bed9491990" \
+    --subnet-id " <YOUR_SUBNET_ID >" \
+    --region ap-northeast-1
+
+
+6.Authorize Access
+
+   Even if it's associated, the VPN will block all traffic until you explicitly tell it that your internal network is allowed.
+Run this command, replacing 10.0.0.0/16 with the CIDR block of your VPC:
+
+    aws ec2 authorize-client-vpn-ingress \
+      --client-vpn-endpoint-id "cvpn-endpoint-0cde241bed9491990" \
+      --target-network-cidr "10.0.0.0/16" \
+      --authorize-all-groups \
+      --region ap-northeast-1
+
+
+
+-----------------------------AWS Client setup on local pc -----------------------------------
+
+1.Download the Client configuration file and add client certificate,key.ca
+
+   Bottom of the oven file, add
+          
+               <ca>
+                -----BEGIN CERTIFICATE-----
+               (Paste contents of ~/vpn-ca/pki/ca.crt here)
+                -----END CERTIFICATE-----
+               </ca>
+
+
+               <cert>
+                -----BEGIN CERTIFICATE-----
+                (Paste contents of ~/vpn-ca/pki/issued/client1.vpn.local.crt here)
+                -----END CERTIFICATE-----
+               </cert>
+
+               <key>
+               -----BEGIN PRIVATE KEY-----
+               (Paste contents of ~/vpn-ca/pki/private/client1.vpn.local.key here)
+               -----END PRIVATE KEY-----
+               </key>
+
+2.Download Client VPN and add Managed profile
+
+
+   Opne Client VPN --> File --> Managed profile --> add profile ---> browse the vpn OVPN file and add --> connect.
+
+
+
